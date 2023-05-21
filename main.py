@@ -12,11 +12,17 @@ def fetch_data():
     database="s24794"
     )
     mycursor = mydb.cursor()
-    mycursor.execute("SELECT * FROM Students")
-    result = mycursor.fetchall()
-    mycursor.close()
-    mydb.close()
-    return result
+    try:
+        mycursor.execute("SELECT * FROM Students")
+        result = mycursor.fetchall()
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        if mycursor:
+            mycursor.close()
+        if mydb:
+            mydb.close()
+        return result
 
 def load_data():
     data = fetch_data()
@@ -129,15 +135,22 @@ def open_new_book_window():
             password="",
             database="s24794"
         )
-        coursor = conn.cursor()
+
+        cursor = conn.cursor()
         sql = "INSERT INTO Students (title, author, price, category)VALUES (%s,%s,%s,%s)"
         params = (email,firstName,lastName,project)
-        coursor.execute(sql,params)
-        conn.commit()
-        coursor.close()
-        conn.close()
-        load_data()
-        new_window.destroy()
+        try:
+            cursor.execute(sql,params)
+            conn.commit()
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+            load_data()
+            new_window.destroy()
     add_button = ttk.Button(new_window, text="Dodaj", command=add_new)
     add_button.pack()
 
@@ -301,12 +314,18 @@ def open_details_window(event):
             cursor = conn.cursor()
             query = "UPDATE Students SET firstName=%s, lastName=%s, project=%s, l1=%s, l2=%s, l3=%s, h1=%s, h2=%s, h3=%s, h4=%s, h5=%s, h6=%s, h7=%s, h8=%s, h9=%s, h10=%s, mark=%s, status=%s,  WHERE email=%s"
             p = (firstName, lastName, project, l1, l2, l3, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, mark, status, email)
-            cursor.execute(query, p)
-            conn.commit()
-            cursor.close()
-            conn.close()
-            load_data()
-            details_window.destroy()
+            try:
+                cursor.execute(query, p)
+                conn.commit()
+            except Exception as e:
+                print(f"Error: {e}")
+            finally:
+                if cursor:
+                    cursor.close()
+                if conn:
+                    conn.close()
+                load_data()
+                details_window.destroy()
         update = ttk.Button(details_window, text="Aktualizuj", command=update)
         update.pack()
         def delete():
@@ -319,56 +338,23 @@ def open_details_window(event):
                 password="",
                 database="s24794"
             )
-            coursor = conn.cursor()
+            cursor = conn.cursor()
             sql = "DELETE FROM Students WHERE email = %s AND firstName = %s AND lastName = %s"
             params = (email, firstName, lastName)
-            coursor.execute(sql, params)
-            conn.commit()
-            coursor.close()
-            conn.close()
-            load_data()
-            details_window.destroy()
+            try:
+                cursor.execute(sql, params)
+                conn.commit()
+            except Exception as e:
+                print(f"Error: {e}")
+            finally:
+                if cursor:
+                    cursor.close()
+                if conn:
+                    conn.close()
+                load_data()
+                details_window.destroy()
         update = ttk.Button(details_window, text="Usun", command=delete)
         update.pack()
-
-def open_delete_book_window():
-    new_window = tk.Toplevel(root)
-    new_window.title("Usun studenta")
-    email_label = ttk.Label(new_window, text="Email:")
-    email_label.pack()
-    email_label_entry = ttk.Entry(new_window)
-    email_label_entry.pack()
-    first_name_label = ttk.Label(new_window, text="Imię:")
-    first_name_label.pack()
-    first_name_entry = ttk.Entry(new_window)
-    first_name_entry.pack()
-    last_name_label = ttk.Label(new_window, text="Nazwisko:")
-    last_name_label.pack()
-    last_name_entry = ttk.Entry(new_window)
-    last_name_entry.pack()
-    def delete():
-        email = email_label_entry.get()
-        firstName = first_name_entry.get()
-        lastName = last_name_entry.get()
-        connection = mysql.connector.connect(
-            host="db4free.net",
-            user="s24794",
-            password="",
-            database="s24794"
-        )
-        coursor = connection.cursor()
-        sql = "DELETE FROM Students WHERE email = %s AND firstName = %s AND lastName = %s"
-        params = (email,firstName, lastName)
-        coursor.execute(sql,params)
-        connection.commit()
-        coursor.close()
-        connection.close()
-        load_data()
-        new_window.destroy()
-
-    add_button = ttk.Button(new_window, text="Usun", command=delete)
-    add_button.pack()
-
 
 root = tk.Tk()
 root.title("Students")
